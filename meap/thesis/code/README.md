@@ -16,6 +16,16 @@ Code related to the project
 
 - **06_polarization_and_fixdistance.R** *(takes a little more than the others)*: polarization calculation and fixed distance calculation (this last one can be reused for any type of event) 
   - *OUTPUT*: 
-    - calculo_polarizacion: polarization information from the usable survey (Survey level) 
-    - daily_df_patronal: A daily calendar from 2011 to 2025 with the distance in weeks from each week to the patron saint festival, ready to be joined to other events, not only patron saint festivals. 
+    - calculo_polarizacion2: polarization information from the usable survey (Survey level) 
+   
+- **06v2_new_polarization_and_fixdistance.R** *(takes a little more than the others)*: new polarization metric. The definitions is in the PDF located in: ../documents/new_polarization_metric.pdf (this last one can be reused for any type of event) 
+  - *OUTPUT*: 
+    - calculo_polarizacion2: polarization information from the usable survey (Survey level) 
+    - daily_df_patronal: A daily calendar from 2011 to 2025 with the distance in weeks from each week to the patron saint festival, ready to be joined to other events, not only patron saint festivals.
+   
+- **07_event_studies_prelim.R** TWFE analysis, with all our data base. (Boxplots, Event studes, and Stargazer tables with TWFE estimators)
+
+- **08_event_studies_compl.R** TWFE analysis, filtering out records of municipalities where there is no at least one person per ideology.
+  
+- **09_stacked_did_prelim.R** *(takes a little more than the others due to cross joins)* Stacked DID approach.
 
