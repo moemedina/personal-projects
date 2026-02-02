@@ -44,3 +44,5 @@ nombres_ent_mun <- catalogo_inegi %>% dplyr::select(KEY, NOM_ENT, NOM_MUN)
 df_inegi <- 
   dplyr::left_join(df_inegi, nombres_ent_mun, by = "KEY") %>%
   dplyr::filter(., !is.na(NOM_ENT))
+
+gc()
