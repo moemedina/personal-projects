@@ -16,7 +16,7 @@ if(length(new.packages)) install.packages(new.packages)
 lapply(list.of.packages, library, character.only = TRUE) 
 
 ##### POLARIZATION INDEX (Srry for the code XD) #####
-calculo_polarizacion <- 
+calculo_polarizacion2 <- 
   df_encuestas %>% 
   dplyr::mutate(.,
                 izquierda = ifelse(ideologia_persona_centro == "IZQUIERDA",1,0),
@@ -94,47 +94,6 @@ calculo_polarizacion <-
       ideologia_presidente_centro == "IZQUIERDA" ~ prop_izquierda4*aprobacion_lsinc + prop_derecha4*desaprobacion_dsinc)
   ) %>%
   dplyr::select(KEY, name, year, fecha_wo_year, ideologia_presidente_centro, 
-                polarizacion1, polarizacion2, polarizacion3)
+                polarizacion1)
 
-##### FIX DISTANCE (can be reused)   #####
-# Time is a circle; it can't be measured in just one direction. 
-# Therefore, the distance between weeks and the survey must be accurately calculated.
-# It is based only on weeks, not surveys, so it can be used to match any other event (e.g., soccer). 
-polarizacion_presidente <- df_encuestas %>% group_by(nombre, ideologia_persona_centro, percepcion_final) %>% tally()
-write.table(polarizacion_presidente, "clipboard-16342", sep = "\t")
-polarizacion_anual <- df_encuestas %>% group_by(year, ideologia_persona_centro, percepcion_final) %>% tally() %>%
-  tidyr::pivot_wider(., id_cols = c(year, ideologia_persona_centro), names_from = percepcion_final, values_from = n)
-izquierda <- distinct(df_encuestas, year, partido_final_centro, ideologia_persona_centro)
-encuestas <- distinct(df_encuestas, name)
-
-daily_df_patronal <- 
-  daily_df_patronal %>% 
-  dplyr::mutate(semana_evento = case_when(
-    time_to_event < 0 ~ n_week - time_to_event, 
-    time_to_event >= 0 ~ n_week - time_to_event
-  ))
-
-semana_maxima <- 
-  dplyr::distinct(daily_df_patronal, year, n_week) %>%
-  dplyr::group_by(year) %>%
-  dplyr::filter(n_week == max(n_week)) %>%
-  dplyr::rename(semana_maxima = n_week)
-
-daily_df_patronal <- 
-  left_join(daily_df_patronal, semana_maxima, by = "year")
-
-daily_df_patronal <- 
-  daily_df_patronal %>%
-  dplyr::mutate(distancia_adelante = case_when(
-    n_week <= semana_evento ~ semana_evento-n_week,
-    n_week > semana_evento ~ n_week-semana_evento
-  ),
-  distancia_atras = case_when(
-    n_week <= semana_evento ~ semana_maxima-semana_evento+n_week,
-    n_week > semana_evento ~ semana_maxima+semana_evento-n_week
-  )) %>%
-  dplyr::group_by(year, n_week, KEY) %>%
-  dplyr::mutate(time_to_event = case_when(
-    n_week <= semana_evento ~ -1*min(distancia_adelante, distancia_atras),
-    n_week > semana_evento ~ min(distancia_adelante, distancia_atras)
-  )) %>% ungroup()
+gc()

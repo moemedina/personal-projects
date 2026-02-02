@@ -137,3 +137,5 @@ df_encuestas <-
 df_encuestas <- dplyr::filter(df_encuestas, percepcion_final != "QUITAR")
 df_encuestas <- dplyr::filter(df_encuestas, KEY != "NA_NA")
 df_corregir <- df_encuestas[!complete.cases(df_encuestas), ]
+
+gc()

@@ -643,3 +643,5 @@ daily_a_weekly <-
 daily_df_patronal <- 
   daily_df_patronal %>%
   dplyr::left_join(., daily_a_weekly, by = c("KEY", "n_week", "year"))
+
+gc()

@@ -62,3 +62,5 @@ daily_df$n_week <- na.locf(daily_df$n_week)
 edo_mun <- distinct(df_inegi, KEY, NOM_ENT, NOM_MUN)
 
 daily_df <- cross_join(daily_df, edo_mun) %>% arrange(NOM_ENT, NOM_MUN, Day)
+
+gc()
