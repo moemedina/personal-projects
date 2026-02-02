@@ -116,7 +116,7 @@ min_distance_df <- stacked_data %>%
 ##### WHAT EVENTS TO MAINTAIN ##### --------------------------------------------
 
 # Definimos el umbral (Threshold)
-THRESHOLD_DAYS <- 30
+THRESHOLD_DAYS <- 28
 
 # 1. Creamos una lista de los event_id que son válidos
 valid_event_ids <- min_distance_df %>%
@@ -188,8 +188,8 @@ stacked_data_reg <-
     fix_effect_week_edo_mun = paste0(event_id_f, "_", survey_week_id, "_", edo, "_", mun),
     treated_from_0_final = ifelse(KEY_survey == KEY_event & relative_time_weeks >= 0 & relative_time_weeks <= 3, 1, 0),
     treated_from_minus1_final = ifelse(KEY_survey == KEY_event & relative_time_weeks >= -1 & relative_time_weeks <= 3, 1, 0)
-  ) %>%
-  dplyr::filter(relative_time_weeks >= -4 & relative_time_weeks <= 4)
+  ) #%>%
+  #dplyr::filter(relative_time_weeks >= -4 & relative_time_weeks <= 4)
 
 stacked_data_reg_post <- 
   stacked_data_reg %>%
@@ -233,20 +233,18 @@ st1 <- felm(polarizacion_con_centro ~ treated_from_minus1_final |
 
 mean10 <- round(mean(stacked_data_reg$polarizacion_con_centro, na.rm = T),2)
 
-tabldedd <- stargazer(st0, st0_edo, st0_edomun, st1,
+tabldedd <- stargazer(st0, st1,
                       header = FALSE,
                       font.size = "scriptsize",
                       dep.var.labels.include = FALSE,
                       table.placement = "H",
                       column.labels = c("||Stacked from 0||",
-                                        "||Stacked from 0 w/edo||",
-                                        "||Stacked from 0 w/edomun||",
                                         "||Stacked from -1||"),
-                      covariate.labels = c("Festividad (x - 3 weeks)"),
+                      covariate.labels = c("Festividad (0 to 3 weeks)","Festividad (-1 to 3 weeks)"),
                       omit.stat = c("f", "ser","adj.rsq"),
-                      add.lines = list(c("Efectos fijos evento-mun", "Sí", "Sí", "Sí", "Sí"),
-                                       c("Efectos fijos evento-tiempo", "Si", "Si+edo", "Sí+edo+mun", "Sí"),
-                                       c("Limitado a +/- 4 semanas", "Si", "Si", "Sí", "Sí"),
+                      add.lines = list(c("Efectos fijos evento-mun", "Sí", "Sí"),
+                                       c("Efectos fijos evento-tiempo", "Si", "Sí"),
+                                       c("Limitado a +/- 4 semanas", "Si", "Sí"),
                                        c("Nivel medio de polarizacion", mean7, mean8, mean9, mean10),
                                        c("Efecto vs. nivel medio")),
                       title = "Stacked approach",
@@ -254,6 +252,14 @@ tabldedd <- stargazer(st0, st0_edo, st0_edomun, st1,
 
 # Event study 
 stacked_time_to_event <- feols(polarizacion1 ~ i(relative_time_weeks, ref = -2) | 
+                                 as.factor(fix_effect_mun) + as.factor(fix_effect_week), 
+                               cluster = "KEY",
+                               data = stacked_data_reg)
+
+ip <- iplot(stacked_time_to_event)
+
+# Event study 
+stacked_time_to_event <- feols(polarizacion1 ~ i(relative_time_weeks, ref = -1) | 
                                  as.factor(fix_effect_mun) + as.factor(fix_effect_week), 
                                cluster = "KEY",
                                data = stacked_data_reg)

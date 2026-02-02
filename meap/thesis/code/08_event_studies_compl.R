@@ -124,21 +124,21 @@ print(boxplot_plot3)
 
 ## TIME TO EVENT PLOTS 
 
-dd_plot_reg1 <- feols(polarizacion_con_centro ~ i(time_to_event, treatment, ref = -2) | 
+dd_plot_reg1 <- feols(polarizacion_con_centro ~ i(time_to_event, treatment, ref = -1) | 
                         encuesta_fechayear + nweek_year + EDO, 
                       cluster = "KEY",
                       data = base_event_study_f)
 
 ip <- iplot(dd_plot_reg1)
 
-dd_plot_reg2 <- feols(polarizacion_sin_centro ~ i(time_to_event, treatment, ref = -2) | 
+dd_plot_reg2 <- feols(polarizacion_sin_centro ~ i(time_to_event, treatment, ref = -1) | 
                         encuesta_fechayear + nweek_year + EDO, 
                       cluster = "KEY",
                       data = base_event_study_f)
 
 ip <- iplot(dd_plot_reg2)
 
-dd_plot_reg3 <- feols(polarizacion1 ~ i(time_to_event, treatment, ref = -2) | 
+dd_plot_reg3 <- feols(polarizacion1 ~ i(time_to_event, treatment, ref = -1) | 
                         encuesta_fechayear + nweek_year + EDO, 
                       cluster = "KEY",
                       data = base_event_study_f)
@@ -148,7 +148,7 @@ ip <- iplot(dd_plot_reg3)
 ## TWFE
 base_event_study_f <- 
   dplyr::mutate(base_event_study_f, 
-                treatment_dummy = ifelse(time_to_event %in% c(-1,0,1,2,3),1,0),
+                treatment_dummy = ifelse(time_to_event %in% c(0,1,2,3),1,0),
                 #year=substr(EDOYEAR,nchar(EDOYEAR)-3,nchar(EDOYEAR)),
                 post_amlo = ifelse(year %in% c("2020","2021","2022","2023","2024"),1,0),
                 treatment_dummy_post = treatment_dummy*post_amlo) %>%
@@ -171,8 +171,8 @@ r1_new_sc_lim <- felm(polarizacion_sin_centro ~ treatment_dummy |
                       data = base_event_study_f %>%
                         dplyr::filter(time_to_event %in% -7:7))
 
-mean2 <- round(mean((base_event_study_f %>% dplyr::filter(time_to_event %in% -4:4))$polarizacion_sin_centro),2)
-median2 <- median((base_event_study_f %>% dplyr::filter(time_to_event %in% -4:4))$polarizacion_sin_centro)
+mean2 <- round(mean((base_event_study_f %>% dplyr::filter(time_to_event %in% -7:7))$polarizacion_sin_centro),2)
+median2 <- median((base_event_study_f %>% dplyr::filter(time_to_event %in% -7:7))$polarizacion_sin_centro)
 
 r1_new_cc <- felm(polarizacion_con_centro ~ treatment_dummy |
                     nweek_year + KEY | # efectos fijos
@@ -190,8 +190,8 @@ r1_new_cc_lim <- felm(polarizacion_con_centro ~ treatment_dummy |
                       data = base_event_study_f %>%
                         dplyr::filter(time_to_event %in% -7:7))
 
-mean4 <- round(mean((base_event_study_f %>% dplyr::filter(time_to_event %in% -4:4))$polarizacion_con_centro),2)
-median4 <- median((base_event_study_f %>% dplyr::filter(time_to_event %in% -4:4))$polarizacion_con_centro)
+mean4 <- round(mean((base_event_study_f %>% dplyr::filter(time_to_event %in% -7:7))$polarizacion_con_centro),2)
+median4 <- median((base_event_study_f %>% dplyr::filter(time_to_event %in% -7:7))$polarizacion_con_centro)
 
 
 a <- felm(polarizacion1 ~ treatment_dummy |
@@ -208,10 +208,10 @@ b <- felm(polarizacion1 ~ treatment_dummy |
             0 |                                     # IV
             KEY,                                    # cluster
           data = base_event_study_f %>%
-            dplyr::filter(time_to_event %in% -4:4))
+            dplyr::filter(time_to_event %in% -7:7))
 
-mean6 <- round(mean((base_event_study_f %>% dplyr::filter(time_to_event %in% -4:4))$polarizacion1),2)
-median6 <- median((base_event_study_f %>% dplyr::filter(time_to_event %in% -4:4))$polarizacion1)
+mean6 <- round(mean((base_event_study_f %>% dplyr::filter(time_to_event %in% -7:7))$polarizacion1),2)
+median6 <- median((base_event_study_f %>% dplyr::filter(time_to_event %in% -7:7))$polarizacion1)
 
 tabldedd <- stargazer(r1_new_cc, r1_new_cc_lim, a, b,
                       header = FALSE,
@@ -219,9 +219,9 @@ tabldedd <- stargazer(r1_new_cc, r1_new_cc_lim, a, b,
                       dep.var.labels.include = FALSE,
                       table.placement = "H",
                       column.labels = c("|| All cc new ||",
-                                        "|| Lim -4:4 cc new ||",
+                                        "|| Lim -7:7 cc new ||",
                                         "|| All old ||",
-                                        "|| Lim -4:4 old|| "),
+                                        "|| Lim -7:7 old|| "),
                       covariate.labels = c("Festividad (0 a 3)"),
                       omit.stat = c("f", "ser","adj.rsq"),
                       add.lines = list(c("Efectos fijos estado-mun", "Sí", "Sí","Sí", "Sí"),

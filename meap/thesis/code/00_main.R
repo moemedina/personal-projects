@@ -30,9 +30,4 @@ source(paste0(my_path, "/code/08_event_studies_compl.R"))
 
 # 9. Preliminary (Stacked)  
 source(paste0(my_path, "/code/09_stacked_did_prelim.R"))
-
-# 10. Weekly Stacked  
-#source(paste0(my_path, "/code/09_stacked_did_prelim.R"))
-
-
 gc()

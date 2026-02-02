@@ -93,7 +93,7 @@ boxplot_plot1 <- ggplot(base_event_study_f, aes(x = factor(year), y = polarizaci
 print(boxplot_plot1)
 
 ## TIME TO EVENT PLOTS 
-dd_plot_reg1 <- feols(polarizacion_con_centro ~ i(time_to_event, treatment, ref = -2) | 
+dd_plot_reg1 <- feols(polarizacion_con_centro ~ i(time_to_event, treatment, ref = -1) | 
                        encuesta_fechayear + nweek_year + EDO, 
                      cluster = "KEY",
                      data = base_event_study_f)
@@ -103,7 +103,7 @@ ip <- iplot(dd_plot_reg1)
 ## TWFE (CLASSIC ESTIMATION)
 base_event_study_f <- 
   dplyr::mutate(base_event_study_f, 
-                treatment_dummy = ifelse(time_to_event %in% c(-1,0,1,2,3),1,0), # treated
+                treatment_dummy = ifelse(time_to_event %in% c(0,1,2,3),1,0), # treated
                 year=substr(encuesta_fechayear,
                             nchar(encuesta_fechayear)-3,
                             nchar(encuesta_fechayear)),
@@ -124,7 +124,7 @@ r1_new_sc_lim <- felm(polarizacion_sin_centro ~ treatment_dummy |
                       0 |                                     # IV
                       KEY,                                    # cluster
                       data = base_event_study_f %>%
-                      dplyr::filter(time_to_event %in% -4:4))
+                      dplyr::filter(time_to_event %in% -7:7))
 
 r1_new_cc <- felm(polarizacion_con_centro ~ treatment_dummy |
                   nweek_year + EDO | # efectos fijos
@@ -137,7 +137,7 @@ r1_new_cc_lim <- felm(polarizacion_con_centro ~ treatment_dummy |
                       0 |                                     # IV
                       KEY,                                    # cluster
                       data = base_event_study_f %>%
-                      dplyr::filter(time_to_event %in% -4:4))
+                      dplyr::filter(time_to_event %in% -7:7))
 
 a <- felm(polarizacion1 ~ treatment_dummy |
           nweek_year + EDO | # efectos fijos
@@ -152,7 +152,7 @@ b <- felm(polarizacion1 ~ treatment_dummy |
           0 |                                     # IV
           KEY,                                    # cluster
           data = base_event_study_f %>%
-          dplyr::filter(time_to_event %in% -4:4))
+          dplyr::filter(time_to_event %in% -7:7))
 
 
 
@@ -167,7 +167,7 @@ tabldedd <- stargazer(r1_new_sc, r1_new_sc_lim, r1_new_cc, r1_new_cc_lim, a, b,
                                         "Lim cc new",
                                         "All old",
                                         "Lim old"),
-                      covariate.labels = c("Festividad (-1 a 3)"),
+                      covariate.labels = c("Festividad (0 a 3)"),
                       omit.stat = c("f", "ser","adj.rsq"),
                       add.lines = list(c("Efectos fijos Estado", "Sí", "Sí", "Sí", "Sí","Sí", "Sí"),
                                        c("Efectos fijos semana-año", "Si", "Si", "Sí", "Sí","Sí", "Sí"),
