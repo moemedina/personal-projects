@@ -8,3 +8,4 @@ Documents related to the project
 	- **processed**: aggregated data with MANUAL transformation, only having relevant information for the project
 - **percepcion_final.csv**: relationship between original labels and final labels to determine perspective of the current government
 - **partidopolitico_final.csv**: relationship between original labels and final labels to determine ideology
+- **new_polarization_metric.pdf**: description of the new polarization metric.
