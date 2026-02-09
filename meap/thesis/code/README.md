@@ -29,3 +29,8 @@ Code related to the project
   
 - **09_stacked_did_prelim.R** *(takes a little more than the others due to cross joins)* Stacked DID approach.
 
+- **10_event_study_plots.R** If you need event study plots with colors :p
+
+- **11_coefficient_plots.R** Visual comparison between methodologies (Main coefficient) 
+ 
+
