@@ -187,13 +187,10 @@ stacked_data_reg <-
     fix_effect_week_edo = paste0(event_id_f, "_", survey_week_id, "_", edo),
     fix_effect_week_edo_mun = paste0(event_id_f, "_", survey_week_id, "_", edo, "_", mun),
     treated_from_0_final = ifelse(KEY_survey == KEY_event & relative_time_weeks >= 0 & relative_time_weeks <= 3, 1, 0),
-    treated_from_minus1_final = ifelse(KEY_survey == KEY_event & relative_time_weeks >= -1 & relative_time_weeks <= 3, 1, 0)
+    treated_from_minus1_final = ifelse(KEY_survey == KEY_event & relative_time_weeks >= -1 & relative_time_weeks <= 3, 1, 0),
+    post_amlo = ifelse(year_event %in% c("2020","2021","2022","2023","2024"),1,0)
   ) #%>%
   #dplyr::filter(relative_time_weeks >= -4 & relative_time_weeks <= 4)
-
-stacked_data_reg_post <- 
-  stacked_data_reg %>%
-  dplyr::filter(relative_time_days >= 0 & relative_time_days <= THRESHOLD_DAYS)
 
 # The regression
 # Outcome: Polarization (y)
@@ -208,22 +205,26 @@ st0 <- felm(polarizacion_con_centro ~ treated_from_0_final |
                   data = stacked_data_reg)
 
 mean7 <- round(mean(stacked_data_reg$polarizacion_con_centro, na.rm = T),2)
+sd7 <- round(sd(stacked_data_reg$polarizacion_con_centro, na.rm = T),2)
 
-st0_edo <- felm(polarizacion_con_centro ~ treated_from_0_final | 
-               as.factor(fix_effect_mun) + as.factor(fix_effect_week_edo) | #
-               0 | 
-               KEY, 
-               data = stacked_data_reg)
+st0_pre <- felm(polarizacion_con_centro ~ treated_from_0_final | 
+              as.factor(fix_effect_mun) + as.factor(fix_effect_week) | # as.factor(fix_effect_time) | # EVENT ID + EVENT ID*DATE + EVENT*KEY
+              0 | # IV
+              KEY, # CLUSTER 
+            data = stacked_data_reg %>% dplyr::filter(post_amlo == 0))
 
-mean8 <- round(mean(stacked_data_reg$polarizacion_con_centro, na.rm = T),2)
+mean8 <- round(mean((stacked_data_reg %>% dplyr::filter(post_amlo == 0))$polarizacion_con_centro, na.rm = T),2)
+sd8 <- round(sd((stacked_data_reg %>% dplyr::filter(post_amlo == 0))$polarizacion_con_centro, na.rm = T),2)
 
-st0_edomun <- felm(polarizacion_con_centro ~ treated_from_0_final | 
-                   as.factor(fix_effect_mun) + as.factor(fix_effect_week_edo_mun) | #
-                   0 | 
-                   KEY, 
-                   data = stacked_data_reg)
 
-mean9 <- round(mean(stacked_data_reg$polarizacion_con_centro, na.rm = T),2)
+st0_post <- felm(polarizacion_con_centro ~ treated_from_0_final | 
+                  as.factor(fix_effect_mun) + as.factor(fix_effect_week) | # as.factor(fix_effect_time) | # EVENT ID + EVENT ID*DATE + EVENT*KEY
+                  0 | # IV
+                  KEY, # CLUSTER 
+                data = stacked_data_reg %>% dplyr::filter(post_amlo == 1))
+
+mean9 <- round(mean((stacked_data_reg %>% dplyr::filter(post_amlo == 1))$polarizacion_con_centro, na.rm = T),2)
+sd9 <- round(sd((stacked_data_reg %>% dplyr::filter(post_amlo == 1))$polarizacion_con_centro, na.rm = T),2)
 
 st1 <- felm(polarizacion_con_centro ~ treated_from_minus1_final | 
               as.factor(fix_effect_mun) + as.factor(fix_effect_week) | # as.factor(fix_effect_time) | # EVENT ID + EVENT ID*DATE + EVENT*KEY
@@ -232,23 +233,62 @@ st1 <- felm(polarizacion_con_centro ~ treated_from_minus1_final |
             data = stacked_data_reg)
 
 mean10 <- round(mean(stacked_data_reg$polarizacion_con_centro, na.rm = T),2)
+sd10 <- round(sd(stacked_data_reg$polarizacion_con_centro, na.rm = T),2)
 
-tabldedd <- stargazer(st0, st1,
+st1_pre <- felm(polarizacion_con_centro ~ treated_from_minus1_final | 
+              as.factor(fix_effect_mun) + as.factor(fix_effect_week) | # as.factor(fix_effect_time) | # EVENT ID + EVENT ID*DATE + EVENT*KEY
+              0 | # IV
+              KEY, # CLUSTER 
+            data = stacked_data_reg %>% dplyr::filter(post_amlo == 0))
+
+mean11 <- round(mean((stacked_data_reg %>% dplyr::filter(post_amlo == 0))$polarizacion_con_centro, na.rm = T),2)
+sd11 <- round(sd((stacked_data_reg %>% dplyr::filter(post_amlo == 0))$polarizacion_con_centro, na.rm = T),2)
+
+st1_post <- felm(polarizacion_con_centro ~ treated_from_minus1_final | 
+                  as.factor(fix_effect_mun) + as.factor(fix_effect_week) | # as.factor(fix_effect_time) | # EVENT ID + EVENT ID*DATE + EVENT*KEY
+                  0 | # IV
+                  KEY, # CLUSTER 
+                data = stacked_data_reg %>% dplyr::filter(post_amlo == 1))
+
+mean12 <- round(mean((stacked_data_reg %>% dplyr::filter(post_amlo == 1))$polarizacion_con_centro, na.rm = T),2)
+sd12 <- round(sd((stacked_data_reg %>% dplyr::filter(post_amlo == 1))$polarizacion_con_centro, na.rm = T),2)
+
+
+tabldedd <- stargazer(st0, st0_pre, st0_post,
                       header = FALSE,
                       font.size = "scriptsize",
                       dep.var.labels.include = FALSE,
                       table.placement = "H",
-                      column.labels = c("||Stacked from 0||",
-                                        "||Stacked from -1||"),
-                      covariate.labels = c("Festividad (0 to 3 weeks)","Festividad (-1 to 3 weeks)"),
+                      column.labels = c("||Stacked DID||",
+                                        "||Stacked DID (Pre Amlo)||",
+                                        "||Stacked DID (Post Amlo)||"),
+                      covariate.labels = c("Festividad (0 to 3 weeks)"),
                       omit.stat = c("f", "ser","adj.rsq"),
                       add.lines = list(c("Efectos fijos evento-mun", "Sí", "Sí"),
                                        c("Efectos fijos evento-tiempo", "Si", "Sí"),
                                        c("Limitado a +/- 4 semanas", "Si", "Sí"),
-                                       c("Nivel medio de polarizacion", mean7, mean8, mean9, mean10),
+                                       c("Nivel medio de polarizacion", mean7, mean8, mean9),
                                        c("Efecto vs. nivel medio")),
                       title = "Stacked approach",
                       type = "text")
+
+tabldedd <- stargazer(st1, st1_pre, st1_post,
+                      header = FALSE,
+                      font.size = "scriptsize",
+                      dep.var.labels.include = FALSE,
+                      table.placement = "H",
+                      column.labels = c("||Stacked DID||",
+                                        "||Stacked DID (Pre Amlo)||",
+                                        "||Stacked DID (Post Amlo)||"),
+                      covariate.labels = c("Festividad (-1 to 3 weeks)"),
+                      omit.stat = c("f", "ser","adj.rsq"),
+                      add.lines = list(c("Efectos fijos evento-mun", "Sí", "Sí"),
+                                       c("Efectos fijos evento-tiempo", "Si", "Sí"),
+                                       c("Limitado a +/- 4 semanas", "Si", "Sí"),
+                                       c("Nivel medio de polarizacion", mean10, mean11, mean12),
+                                       c("Efecto vs. nivel medio")),
+                      title = "Stacked approach",
+                      type = "latex")
 
 # Event study 
 stacked_time_to_event <- feols(polarizacion1 ~ i(relative_time_weeks, ref = -2) | 
